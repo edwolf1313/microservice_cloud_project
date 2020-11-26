@@ -15,7 +15,7 @@ from drf_yasg.utils import swagger_auto_schema
 from session_api.auth import CustomAuthentication
 from session_api.exceptions import TokenExpired
 from session_api.generators import generate_client_id, generate_client_secret
-from session_api.serializers import AuthTokenCreateSerializer, SessionCreateSerializer
+from session_api.serializers import AuthTokenCreateSerializer, SessionCreateSerializer, ClientApplicationId
 
 class LoginAccessView(APIView):
     authentication_classes = []
@@ -73,9 +73,10 @@ class LoginAccessView(APIView):
                     )[0]
                 else:
                     token.access_token = generate_client_secret()
-                    token.expiry_date = timezone.now() + timedelta(hours=2)
+                    token.expiry_date = timezone.now() + timedelta(minutes=100)
                     token.refresh_token = generate_client_secret()
                     token.refresh_token_expiry = timezone.now() + timedelta(days=7)
+                    token.expired = False
                     token.save()
                     res = (
                         AuthToken.objects.filter(session_application=client_present)
@@ -143,7 +144,6 @@ class CreateAccessView(APIView):
             client_present = session_client_data.objects.get(
                 client_id=req_client_id, client_secret=req_client_secret
             )
-            print(client_present)
             return Response(data={"status": "Client has existed, try to login using username"}, status=status.HTTP_403_FORBIDDEN)
         except:
             serializer = SessionCreateSerializer(data=request.data)
@@ -154,8 +154,9 @@ class CreateAccessView(APIView):
                 return Response(data={"status": "Created account failed"}, status=status.HTTP_403_FORBIDDEN)
 
 class CheckSessionView(APIView):
+    import json
     authentication_classes = [ CustomAuthentication ]
     permission_classes = []
     parser_classes = (JSONParser,)
     def get(self, request):
-        return Response(data={"status": "session not expired"}, status=status.HTTP_200_OK)
+        return Response(data=request.data, status=status.HTTP_200_OK)

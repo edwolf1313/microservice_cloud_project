@@ -30,4 +30,4 @@ class AuthToken(models.Model):
         session_client_data, on_delete=models.CASCADE, related_name="session_data_client", primary_key=True
     )
     def __str__(self):
-        return self.session_application
+        return self.access_token

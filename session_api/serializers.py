@@ -27,3 +27,8 @@ class AuthTokenCreateSerializer(serializers.ModelSerializer):
         authtoken = AuthToken(**validated_data)
         authtoken.save()
         return authtoken
+
+class ClientApplicationId(serializers.ModelSerializer):
+        class Meta:
+            model = session_client_data
+            fields = ("session_application_id",)
