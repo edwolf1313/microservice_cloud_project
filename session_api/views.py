@@ -160,3 +160,13 @@ class CheckSessionView(APIView):
     parser_classes = (JSONParser,)
     def get(self, request):
         return Response(data=request.data, status=status.HTTP_200_OK)
+
+class DeleteSessionView(APIView):
+    authentication_classes = [ CustomAuthentication ]
+    permission_classes = []
+    parser_classes = (JSONParser,)
+    def delete(self,request,format=None):
+        #print(request.data['client_id'])
+        delete_session = AuthToken.objects.get(session_application_id=request.data['client_id'])
+        delete_session.delete()
+        return Response(status=status.HTTP_200_OK)
